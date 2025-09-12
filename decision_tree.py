@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Self
+import math
 
 """
 This is a suggested template and you do not need to follow it. You can change any part of it to fit your needs.
@@ -34,8 +35,12 @@ def entropy(y: np.ndarray) -> float:
     Return the entropy of a given NumPy array y.
     """
     probs = count(y)
-    return -np.sum(probs * np.log2(probs + 1e-9))
-
+    result = 0
+    for p in probs:
+        if p>0:
+            result += p * math.log2(p)
+    
+    return -result
 
 def split(x: np.ndarray, value: float) -> np.ndarray:
     """
@@ -101,17 +106,69 @@ class DecisionTree:
         """
         This functions learns a decision tree given (continuous) features X and (integer) labels y.
         """
-        raise NotImplementedError(
-            "Implement this function"
-        )  # Remove this line when you implement the function
+        def impurity(y):
+            if self.criterion == "entropy":
+                return entropy(y)
+            elif self.criterion == "gini":
+                return gini_index(y)
+            else:
+                raise ValueError("Unknown criterion")
+
+        def best_split(X, y):
+            best_feature, best_threshold, best_gain = None, None, -np.inf
+            n_features = X.shape[1]
+            current_impurity = impurity(y)
+            for feature in range(n_features):
+                values = X[:, feature]
+                threshold = np.mean(values)
+                left_mask = split(values, threshold)
+                right_mask = ~left_mask
+                if np.sum(left_mask) == 0 or np.sum(right_mask) == 0:
+                    continue
+                left_impurity = impurity(y[left_mask])
+                right_impurity = impurity(y[right_mask])
+                left_weight = np.sum(left_mask) / len(y)
+                right_weight = np.sum(right_mask) / len(y)
+                gain = current_impurity - (left_weight * left_impurity + right_weight * right_impurity)
+                if gain > best_gain:
+                    best_gain = gain
+                    best_feature = feature
+                    best_threshold = threshold
+            return best_feature, best_threshold, best_gain
+
+        def build_tree(X, y, depth):
+            # If all labels are the same, return a leaf
+            if len(np.unique(y)) == 1:
+                return Node(value=y[0])
+            # If all features are identical, return a leaf with most common label
+            if np.all(X == X[0]):
+                return Node(value=most_common(y))
+            # If max_depth is reached, return a leaf with most common label
+            if self.max_depth is not None and depth >= self.max_depth:
+                return Node(value=most_common(y))
+            feature, threshold, gain = best_split(X, y)
+            if feature is None or gain <= 0:
+                return Node(value=most_common(y))
+            left_mask = split(X[:, feature], threshold)
+            right_mask = ~left_mask
+            left = build_tree(X[left_mask], y[left_mask], depth + 1)
+            right = build_tree(X[right_mask], y[right_mask], depth + 1)
+            return Node(feature=feature, threshold=threshold, left=left, right=right)
+
+        self.root = build_tree(X, y, 0)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
         Given a NumPy array X of features, return a NumPy array of predicted integer labels.
         """
-        raise NotImplementedError(
-            "Implement this function"
-        )  # Remove this line when you implement the function
+        def traverse(x, node):
+            while not node.is_leaf():
+                if x[node.feature] <= node.threshold:
+                    node = node.left
+                else:
+                    node = node.right
+            return node.value
+        return np.array([traverse(x, self.root) for x in X])
 
 
 if __name__ == "__main__":
