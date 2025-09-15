@@ -15,14 +15,27 @@ class RandomForest:
         self.max_features = max_features
 
     def fit(self, X: np.ndarray, y: np.ndarray):
-        raise NotImplementedError(
-            "Implement this function"
-        )  # Remove this line when you implement the function
+        n_samples = X.shape[0]
+        self.trees = []
+        for _ in range(self.n_estimators):
+            indices = np.random.choice(n_samples, n_samples, replace=True)  # bootstrap sample
+            X_sample, y_sample = X[indices], y[indices]
+            tree = DecisionTree(
+                max_depth=self.max_depth,
+                criterion=self.criterion,
+                max_features=self.max_features,
+            )
+            tree.fit(X_sample, y_sample)
+            self.trees.append(tree)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        raise NotImplementedError(
-            "Implement this function"
-        )  # Remove this line when you implement the function
+        tree_preds = np.array([tree.predict(X) for tree in self.trees])  # shape: (n_estimators, n_samples)
+        # majority vote along axis 0
+        final_preds = []
+        for i in range(X.shape[0]):
+            values, counts = np.unique(tree_preds[:, i], return_counts=True)
+            final_preds.append(values[np.argmax(counts)])
+        return np.array(final_preds)
 
 
 if __name__ == "__main__":
