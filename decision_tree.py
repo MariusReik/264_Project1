@@ -128,7 +128,7 @@ class DecisionTree:
             elif self.max_features is None:
                 n_sub = n_features
             else:
-                n_sub = n_features  # fallback
+                n_sub = n_features
 
             # velg tilfeldige features
             chosen = np.random.choice(n_features, n_sub, replace=False)
