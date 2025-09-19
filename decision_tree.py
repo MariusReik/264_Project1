@@ -93,10 +93,12 @@ class DecisionTree:
         self,
         max_depth: int | None = None,
         criterion: str = "entropy",
+        max_features: None | str = None,
     ) -> None:
         self.root = None
         self.criterion = criterion
         self.max_depth = max_depth
+        self.max_features = max_features
 
     def fit(
         self,
@@ -117,8 +119,22 @@ class DecisionTree:
         def best_split(X, y):
             best_feature, best_threshold, best_gain = None, None, -np.inf
             n_features = X.shape[1]
+
+            # finn hvor mange features som skal brukes
+            if self.max_features == "sqrt":
+                n_sub = int(np.sqrt(n_features))
+            elif self.max_features == "log2":
+                n_sub = int(np.log2(n_features))
+            elif self.max_features is None:
+                n_sub = n_features
+            else:
+                n_sub = n_features  # fallback
+
+            # velg tilfeldige features
+            chosen = np.random.choice(n_features, n_sub, replace=False)
+
             current_impurity = impurity(y)
-            for feature in range(n_features):
+            for feature in chosen:
                 values = X[:, feature]
                 threshold = np.mean(values)
                 left_mask = split(values, threshold)
@@ -134,7 +150,9 @@ class DecisionTree:
                     best_gain = gain
                     best_feature = feature
                     best_threshold = threshold
+
             return best_feature, best_threshold, best_gain
+
 
         def build_tree(X, y, depth):
             # If all labels are the same, return a leaf
