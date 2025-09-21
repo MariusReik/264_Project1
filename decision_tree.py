@@ -94,11 +94,13 @@ class DecisionTree:
         max_depth: int | None = None,
         criterion: str = "entropy",
         max_features: None | str = None,
+        random_state: int | None = None,
     ) -> None:
         self.root = None
         self.criterion = criterion
         self.max_depth = max_depth
         self.max_features = max_features
+        self.rng = np.random.default_rng(random_state);
 
     def fit(
         self,
@@ -131,7 +133,7 @@ class DecisionTree:
                 n_sub = n_features
 
             # velg tilfeldige features
-            chosen = np.random.choice(n_features, n_sub, replace=False)
+            chosen = self.rng.choice(n_features, n_sub, replace=False)
 
             current_impurity = impurity(y)
             for feature in chosen:

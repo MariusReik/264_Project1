@@ -9,22 +9,26 @@ class RandomForest:
         max_depth: int = 5,
         criterion: str = "entropy",
         max_features: None | str = "sqrt",
+        random_state: int | None = None,
     ) -> None:
         self.n_estimators = n_estimators
         self.max_depth = max_depth
         self.criterion = criterion
         self.max_features = max_features
+        self.random_state = random_state
+        self.rng = np.random.default_rng(random_state)
 
     def fit(self, X: np.ndarray, y: np.ndarray):
         n_samples = X.shape[0]
         self.trees = []
         for _ in range(self.n_estimators):
-            indices = np.random.choice(n_samples, n_samples, replace=True)  # bootstrap sample
+            indices = self.rng.choice(n_samples, n_samples, replace=True)
             X_sample, y_sample = X[indices], y[indices]
             tree = DecisionTree(
                 max_depth=self.max_depth,
                 criterion=self.criterion,
                 max_features=self.max_features,
+                random_state=self.random_state,
             )
             tree.fit(X_sample, y_sample)
             self.trees.append(tree)
