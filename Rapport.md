@@ -69,7 +69,7 @@ SKlearn Random Forest: 0.8775
 
 Permutation importance is used to check how much each feature actually matters for the model. You shuffle one feature at a time and see how the accuracy changes. A big drop means the feature is important, while little or no change means it isn’t very useful.
 
-In our results, shown in the graph above, almost all features have little or no impact on the model. The two exceptions are **xy2br** and **yege**, which are both way more impactful on the models performance.
+In our results, shown in the graph above, almost all features have little or no impact on the model. The three exceptions are **xy2br**, **y2bar** and **yege**, which are both way more impactful on the models performance.
 
 A strength of this method is that it is model agnostic, so it works with any kind of model. It is also easy to understand and explain. However, it has some weaknesses. If features are strongly correlated, the method can underestimate their importance, since shuffling one feature may not matter if another correlated one is still present. It also depends on the test data and can be slow on larger datasets because the model has to be run many times.
 
