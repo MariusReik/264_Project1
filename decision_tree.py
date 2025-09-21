@@ -3,9 +3,8 @@ from typing import Self
 import math
 
 """
-This is a suggested template and you do not need to follow it. You can change any part of it to fit your needs.
-There are some helper functions that might be useful to implement first.
-At the end there is some test code that you can use to test your implementation on synthetic data by running this file.
+Decision tree implementation INF264 Project 1 Marius og lyder
+
 """
 
 def count(y: np.ndarray) -> np.ndarray:
@@ -69,19 +68,14 @@ class Node:
     and left and right are the left and right child nodes.
     """
 
-    def __init__(
-        self,
-        feature: int = 0,
-        threshold: float = 0.0,
-        left: int | Self | None = None,
-        right: int | Self | None = None,
-        value: int | None = None,
-    ) -> None:
+class Node:
+    def __init__(self, feature=0, threshold=0.0, left=None, right=None, value=None):
         self.feature = feature
         self.threshold = threshold
         self.left = left
         self.right = right
         self.value = value
+
 
     def is_leaf(self) -> bool:
         # Return True iff the node is a leaf node
@@ -100,47 +94,42 @@ class DecisionTree:
         self.criterion = criterion
         self.max_depth = max_depth
         self.max_features = max_features
-        self.rng = np.random.default_rng(random_state);
+        self.rng = np.random.default_rng(random_state)
 
-    def fit(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-    ):
-        """
-        This functions learns a decision tree given (continuous) features X and (integer) labels y.
-        """
+    def fit(self, X: np.ndarray, y: np.ndarray):
+        # velg impurity-funksjon
         def impurity(y):
             if self.criterion == "entropy":
                 return entropy(y)
             elif self.criterion == "gini":
                 return gini_index(y)
             else:
-                raise ValueError("Unknown criterion")
+                raise ValueError("Ukjent kriterie")
 
         def best_split(X, y):
+
             best_feature, best_threshold, best_gain = None, None, -np.inf
             n_features = X.shape[1]
 
-            # finn hvor mange features som skal brukes
+            # hvor mange features som vurderes
             if self.max_features == "sqrt":
                 n_sub = int(np.sqrt(n_features))
             elif self.max_features == "log2":
                 n_sub = int(np.log2(n_features))
-            elif self.max_features is None:
-                n_sub = n_features
             else:
                 n_sub = n_features
 
-            # velg tilfeldige features
+            # trekk tilfeldige features
             chosen = self.rng.choice(n_features, n_sub, replace=False)
 
             current_impurity = impurity(y)
+
             for feature in chosen:
                 values = X[:, feature]
-                threshold = np.mean(values)
+                threshold = np.mean(values)  # gjennomsnitt som threshold
                 left_mask = split(values, threshold)
                 right_mask = ~left_mask
+
                 if np.sum(left_mask) == 0 or np.sum(right_mask) == 0:
                     continue
                 left_impurity = impurity(y[left_mask])
@@ -148,6 +137,7 @@ class DecisionTree:
                 left_weight = np.sum(left_mask) / len(y)
                 right_weight = np.sum(right_mask) / len(y)
                 gain = current_impurity - (left_weight * left_impurity + right_weight * right_impurity)
+
                 if gain > best_gain:
                     best_gain = gain
                     best_feature = feature
@@ -155,27 +145,29 @@ class DecisionTree:
 
             return best_feature, best_threshold, best_gain
 
-
         def build_tree(X, y, depth):
-            # If all labels are the same, return a leaf
-            if len(np.unique(y)) == 1:
+
+            if len(np.unique(y)) == 1:  # alle labels like
                 return Node(value=y[0])
-            # If all features are identical, return a leaf with most common label
-            if np.all(X == X[0]):
+            if all(np.array_equal(row, X[0]) for row in X):  # alle rader like
                 return Node(value=most_common(y))
-            # If max_depth is reached, return a leaf with most common label
-            if self.max_depth is not None and depth >= self.max_depth:
+            if self.max_depth is not None and depth >= self.max_depth:  # nådd maks dybde
                 return Node(value=most_common(y))
+
             feature, threshold, gain = best_split(X, y)
-            if feature is None or gain <= 0:
+
+            if feature is None or gain <= 0:  # ingen nyttig split
                 return Node(value=most_common(y))
+
             left_mask = split(X[:, feature], threshold)
             right_mask = ~left_mask
             left = build_tree(X[left_mask], y[left_mask], depth + 1)
             right = build_tree(X[right_mask], y[right_mask], depth + 1)
             return Node(feature=feature, threshold=threshold, left=left, right=right)
 
+        # bygging av treet
         self.root = build_tree(X, y, 0)
+
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
