@@ -68,19 +68,14 @@ class Node:
     and left and right are the left and right child nodes.
     """
 
-    def __init__(
-        self,
-        feature: int = 0,
-        threshold: float = 0.0,
-        left: int | Self | None = None,
-        right: int | Self | None = None,
-        value: int | None = None,
-    ) -> None:
+class Node:
+    def __init__(self, feature=0, threshold=0.0, left=None, right=None, value=None):
         self.feature = feature
         self.threshold = threshold
         self.left = left
         self.right = right
         self.value = value
+
 
     def is_leaf(self) -> bool:
         # Return True iff the node is a leaf node
@@ -160,7 +155,7 @@ class DecisionTree:
                 return Node(value=most_common(y))
 
             feature, threshold, gain = best_split(X, y)
-            
+
             if feature is None or gain <= 0:  # ingen nyttig split
                 return Node(value=most_common(y))
 

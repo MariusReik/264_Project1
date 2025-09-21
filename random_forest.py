@@ -3,20 +3,14 @@ from decision_tree import DecisionTree
 
 
 class RandomForest:
-    def __init__(
-        self,
-        n_estimators: int = 100,
-        max_depth: int = 5,
-        criterion: str = "entropy",
-        max_features: None | str = "sqrt",
-        random_state: int | None = None,
-    ) -> None:
+    def __init__(self, n_estimators=100, max_depth=None, criterion="entropy", max_features="sqrt", random_state=None):
         self.n_estimators = n_estimators
         self.max_depth = max_depth
         self.criterion = criterion
         self.max_features = max_features
         self.random_state = random_state
         self.rng = np.random.default_rng(random_state)
+
 
     def fit(self, X, y):
         rng = np.random.default_rng(self.random_state)
