@@ -1,9 +1,9 @@
-#### Introdution
+### Introdution
 The purpose of this project is to implement two machine learning algorithms and evaluate them using a real-world dataset. The two algorithms in question are the Decision Tree and Random Forest algorithms.
 
 Later, we will also implement the Permutation Importance algorithm and use it to evaluate the Random Forest algorithm.
 
-### Group Members
+## Group Members
 -Marius Reikerås
 -Lyder Samnøy
 
@@ -26,10 +26,10 @@ n_estimators are the number of decision trees in the forest
 maximum depth, maximum features, and the criterion argument are the same parameters as with the Decision Tree
 
 
-### Data Processing
+## Data Processing
 The dataset test/train ratio is 80/20, which is the standard. We also use k-fold cross validation and a random seed.
 
-#### Model Selection and Evaluation 
+### Model Selection and Evaluation 
 Preformance tests for the algorithms were mainly done through grid search to find the hyperparameter values which yiled the highest accuracy. For the Decision Tree algorithm, we tested entropy and gini as our criterion arguments. For max_depth, we tested the default value of none, as well as the values 5, 10, 15, and 20. max_features was tested with the values none, sqrt, and log2.
 
 For the Random Forest, we tested with n_estimators set to 10, 20, 30, and 40. For max_features, we reduced the breadth of the tests, only testing sqrt and log2.
@@ -71,7 +71,7 @@ Sklearn RandomForest test accuracy: 0.9875
 
 Permutation importance is used to check how much each feature actually matters for the model. You shuffle one feature at a time and see how the accuracy changes. A big drop means the feature is important, while little or no change means it isn’t very useful.
 
-In our results, shown in the graph above, almost all features have little or no impact on the model. The three exceptions are **xy2br**, **y2bar** and **yege**, which are both way more impactful on the models performance.
+In our results, shown in the graph above, most of the features have little or no impact on the model. The three exceptions are **xy2br**, **y2bar** and **yege**, which are more impactful on the models performance. This makes the model easier to interpret, but also make it weak to "noise" if those features are affected. The feature xy2br captures curvature and symmetry of the letters, which makes it useful for rounded letters. And, yege measures vertical edges which helps in identifying straight letters. Togeheter these features cover aspects of identifying the correct letters, which makes both useful for the models performance. 
 
 A strength of this method is that it is model agnostic, so it works with any kind of model. It is also easy to understand and explain. However, it has some weaknesses. If features are strongly correlated, the method can underestimate their importance, since shuffling one feature may not matter if another correlated one is still present. It also depends on the test data and can be slow on larger datasets because the model has to be run many times.
 
